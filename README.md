@@ -1,6 +1,6 @@
 # 
 
-# <!--- WooliesX ---> Technical Assessment by Felipe Drumond
+# Technical Assessment by Felipe Drumond
 * Github profile: https://github.com/felipedrumond
 * LinkedIn profile: https://www.linkedin.com/in/felipedrumond/
 
