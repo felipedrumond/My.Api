@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace My.Api.Tests.Trolleys
 {
     [TestClass]
-    public class TrolleyCalculatorTests
+    public class TrolleyCalculatorTests : TestsBase
     {
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -18,24 +18,23 @@ namespace My.Api.Tests.Trolleys
         }
 
         [TestMethod]
-        public void Calculate_Trolley_Total_Price()
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Calculate_Trolley_Total_Price_With_Duplicated_Products_In_Catalog_Throws_Exception()
         {
             // arrange
             var fakeProducts = new List<Models.Product>() {
-                FakeProduct("1", 2),
-                FakeProduct("2", 5)
+                FakeProduct("berries", 2),
+                FakeProduct("berries", 5),
             };
 
             #region fakeQuantitiesForSpecials
 
             var fakeQuantitiesForSpecials1 = new List<Quantity>() {
-                FakeQuantity("1", 3),
-                FakeQuantity("2", 0),
+                FakeQuantity("berries", 3),
             };
 
             var fakeQuantitiesForSpecials2 = new List<Quantity>() {
-                FakeQuantity("1", 1),
-                FakeQuantity("2", 2),
+                FakeQuantity("berries", 1),
             };
 
             var bundleConfigurations = new List<Special>()
@@ -48,8 +47,7 @@ namespace My.Api.Tests.Trolleys
 
             var fakeQuantities = new List<Quantity>()
             {
-                FakeQuantity("1", 3),
-                FakeQuantity("2", 2)
+                FakeQuantity("berries", 3),
             };
 
             var trolley = FakeTrolley(fakeProducts, bundleConfigurations, fakeQuantities);
@@ -63,49 +61,96 @@ namespace My.Api.Tests.Trolleys
             Assert.AreEqual(14M, total);
         }
 
-        protected Product FakeProduct(string name, decimal price)
+        [TestMethod]
+        public void Calculate_Trolley_Total_Price()
         {
-            var product = new Product()
-            {
-                Name = name,
-                Price = price,
+            // arrange
+            var fakeProducts = new List<Models.Product>() {
+                FakeProduct("berries", 2),
+                FakeProduct("avocado", 5)
             };
 
-            return product;
+            #region fakeQuantitiesForSpecials
+
+            var fakeQuantitiesForSpecials1 = new List<Quantity>() {
+                FakeQuantity("berries", 3),
+                FakeQuantity("avocado", 0),
+            };
+
+            var fakeQuantitiesForSpecials2 = new List<Quantity>() {
+                FakeQuantity("berries", 1),
+                FakeQuantity("avocado", 2),
+            };
+
+            var bundleConfigurations = new List<Special>()
+            {
+                FakeSpecial(fakeQuantitiesForSpecials1, 5),
+                FakeSpecial(fakeQuantitiesForSpecials2, 10),
+            };
+
+            #endregion fakeQuantitiesForSpecials
+
+            var fakeQuantities = new List<Quantity>()
+            {
+                FakeQuantity("berries", 3),
+                FakeQuantity("avocado", 2)
+            };
+
+            var trolley = FakeTrolley(fakeProducts, bundleConfigurations, fakeQuantities);
+
+            var trolleyCalculator = new TrolleyCalculator(trolley);
+
+            // act
+            var total = trolleyCalculator.CalculateTotal();
+
+            // assert
+            Assert.AreEqual(14M, total);
         }
 
-        protected Special FakeSpecial(List<Quantity> quantities, decimal total)
+        [TestMethod]
+        public void Calculate_Trolley_Total_Price_With_Reminiscent_Items()
         {
-            var special = new Special()
-            {
-                Quantities = quantities,
-                Total = total
+            // arrange
+            var fakeProducts = new List<Models.Product>() {
+                FakeProduct("berries", 2),
+                FakeProduct("avocado", 5),
             };
 
-            return special;
-        }
+            #region fakeQuantitiesForSpecials
 
-        protected Quantity FakeQuantity(string name, decimal quantity)
-        {
-            var _quantity = new Quantity()
-            {
-                Name = name,
-                _Quantity = quantity
+            var fakeQuantitiesForBundle1 = new List<Quantity>() {
+                FakeQuantity("berries", 3),
+                FakeQuantity("avocado", 0),
             };
 
-            return _quantity;
-        }
-
-        protected Trolley FakeTrolley(List<Product> products, List<Special> bundleConfigurations, List<Quantity> quantities)
-        {
-            var trolley = new Trolley()
-            {
-                Products = products,
-                Specials = bundleConfigurations,
-                Quantities = quantities
+            var fakeQuantitiesForBundle2 = new List<Quantity>() {
+                FakeQuantity("berries", 1),
+                FakeQuantity("avocado", 2),
             };
 
-            return trolley;
+            var bundleConfigurations = new List<Special>()
+            {
+                FakeSpecial(fakeQuantitiesForBundle1, 5),
+                FakeSpecial(fakeQuantitiesForBundle2, 10),
+            };
+
+            #endregion fakeQuantitiesForSpecials
+
+            var fakeQuantities = new List<Quantity>()
+            {
+                FakeQuantity("berries", 3),
+                FakeQuantity("avocado", 3)
+            };
+
+            var trolley = FakeTrolley(fakeProducts, bundleConfigurations, fakeQuantities);
+
+            var trolleyCalculator = new TrolleyCalculator(trolley);
+
+            // act
+            var total = trolleyCalculator.CalculateTotal();
+
+            // assert
+            Assert.AreEqual(19M, total);
         }
     }
 }
