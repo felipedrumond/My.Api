@@ -44,12 +44,14 @@ namespace My.Api.Trolleys
 
         private decimal GetRegularPriceOfItem(Quantity item, List<Product> products)
         {
-            var price = products
-                .Where(p => p.Name == item.Name)
-                .Single()?.Price
-                ?? throw new System.Exception("Not a single product was found.");
+            var productsInCatalog = products.Where(p => p.Name == item.Name);
 
-            return price;
+            if (productsInCatalog.Count() != 1)
+            {
+                throw new TrolleyCalculationException();
+            }    
+
+            return productsInCatalog.Single().Price;
         }
 
         private Special GetSpecialBundleConfiguration(List<Quantity> items, List<Special> specials)

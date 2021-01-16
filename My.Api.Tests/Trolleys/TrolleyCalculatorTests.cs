@@ -18,7 +18,7 @@ namespace My.Api.Tests.Trolleys
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
+        [ExpectedException(typeof(TrolleyCalculationException), "Trolley failed to calculate its total.")]
         public void Calculate_Trolley_Total_Price_With_Duplicated_Products_In_Catalog_Throws_Exception()
         {
             // arrange
@@ -44,6 +44,33 @@ namespace My.Api.Tests.Trolleys
             };
 
             #endregion fakeQuantitiesForSpecials
+
+            var fakeQuantities = new List<Quantity>()
+            {
+                FakeQuantity("berries", 3),
+            };
+
+            var trolley = FakeTrolley(fakeProducts, bundleConfigurations, fakeQuantities);
+
+            var trolleyCalculator = new TrolleyCalculator(trolley);
+
+            // act
+            var total = trolleyCalculator.CalculateTotal();
+
+            // assert
+            Assert.AreEqual(14M, total);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(TrolleyCalculationException), "Trolley failed to calculate its total.")]
+        public void Calculate_Trolley_Total_Price_With_Product_Not_Found_In_Catalog_Throws_Exception()
+        {
+            // arrange
+            var fakeProducts = new List<Models.Product>() {
+                FakeProduct("toilet paper", 2),
+            };
+
+            var bundleConfigurations = new List<Special>() { };
 
             var fakeQuantities = new List<Quantity>()
             {
