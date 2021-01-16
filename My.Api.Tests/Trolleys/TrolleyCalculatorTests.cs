@@ -1,13 +1,22 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using My.Api.Trolleys;
 using My.Api.Models;
+using My.Api.Trolleys;
+using System;
+using System.Collections.Generic;
 
 namespace My.Api.Tests.Trolleys
 {
     [TestClass]
     public class TrolleyCalculatorTests
     {
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Calculate_Trolley_With_Null_Trolley_Throws_Exception()
+        {
+            // act
+            new TrolleyCalculator(null);
+        }
+
         [TestMethod]
         public void Calculate_Trolley_Total_Price()
         {
@@ -18,6 +27,7 @@ namespace My.Api.Tests.Trolleys
             };
 
             #region fakeQuantitiesForSpecials
+
             var fakeQuantitiesForSpecials1 = new List<Quantity>() {
                 FakeQuantity("1", 3),
                 FakeQuantity("2", 0),
@@ -33,7 +43,8 @@ namespace My.Api.Tests.Trolleys
                 FakeSpecial(fakeQuantitiesForSpecials1, 5),
                 FakeSpecial(fakeQuantitiesForSpecials2, 10),
             };
-            #endregion
+
+            #endregion fakeQuantitiesForSpecials
 
             var fakeQuantities = new List<Quantity>()
             {
@@ -44,7 +55,7 @@ namespace My.Api.Tests.Trolleys
             var trolley = FakeTrolley(fakeProducts, bundleConfigurations, fakeQuantities);
 
             var trolleyCalculator = new TrolleyCalculator(trolley);
-            
+
             // act
             var total = trolleyCalculator.CalculateTotal();
 
@@ -78,7 +89,7 @@ namespace My.Api.Tests.Trolleys
         {
             var _quantity = new Quantity()
             {
-                Name  = name,
+                Name = name,
                 _Quantity = quantity
             };
 

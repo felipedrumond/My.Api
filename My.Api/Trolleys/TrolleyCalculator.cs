@@ -1,4 +1,5 @@
 ﻿using My.Api.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +11,7 @@ namespace My.Api.Trolleys
 
         public TrolleyCalculator(Trolley trolley)
         {
-            this.trolley = trolley;
+            this.trolley = trolley ?? throw new ArgumentNullException(nameof(trolley));
         }
 
         public decimal CalculateTotal()
