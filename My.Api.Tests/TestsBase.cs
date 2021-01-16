@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using My.Api.Models;
+using System.Collections.Generic;
 using WXDevChallengeService.Models;
 
 namespace My.Api.Tests
@@ -31,6 +32,52 @@ namespace My.Api.Tests
             };
 
             return product;
+        }
+
+        protected Models.Product FakeProduct(string name, decimal price)
+        {
+            var product = new Models.Product()
+            {
+                Name = name,
+                Price = price,
+            };
+
+            return product;
+        }
+
+        protected Special FakeSpecial(List<Quantity> quantities, decimal total)
+        {
+            var special = new Special()
+            {
+                Quantities = quantities,
+                Total = total
+            };
+
+            return special;
+        }
+
+        protected Quantity FakeQuantity(string name, decimal quantity)
+        {
+            var _quantity = new Quantity()
+            {
+                Name = name,
+                _Quantity = quantity
+            };
+
+            return _quantity;
+        }
+
+
+        protected Trolley FakeTrolley(List<Models.Product> products, List<Special> bundleConfigurations, List<Quantity> quantities)
+        {
+            var trolley = new Trolley()
+            {
+                Products = products,
+                Specials = bundleConfigurations,
+                Quantities = quantities
+            };
+
+            return trolley;
         }
     }
 }
