@@ -12,6 +12,7 @@ namespace WXDevChallengeService.Services.OnlineStore
     public class OnlineStoreService : IOnlineStoreService, IDisposable
     {
         private readonly HttpClient _httpClient;
+        private string[] sortingOptions = new string[] { "High", "Low", "Ascending", "Descending" };
 
         private readonly JsonSerializerOptions options = new JsonSerializerOptions
         {
@@ -20,7 +21,7 @@ namespace WXDevChallengeService.Services.OnlineStore
 
         public OnlineStoreService(HttpClient httpClient)
         {
-            this._httpClient = httpClient;
+            this._httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         public async Task<List<CustomerHistory>> GetCustomersHistoryAsync(string userToken)
@@ -58,7 +59,37 @@ namespace WXDevChallengeService.Services.OnlineStore
             return result;
         }
 
-        public async Task<List<Product>> GetRecommendedProductsAsync(string userToken)
+        public async Task<List<Product>> GetSortedProductsAsync(string userToken, string sortOption)
+        {
+            if (!sortingOptions.Contains(sortOption))
+                throw new OnlineStoreServiceException();
+
+            if (sortOption == "Recommended")
+            {
+                var recommendedProducts = await this.GetRecommendedProductsAsync(userToken);
+                return recommendedProducts;
+            }
+
+            var products = await this.GetProductsAsync(userToken);
+            switch (sortOption)
+            {
+                case "Low":
+                    return products.OrderBy(p => p.Price).ToList();
+
+                case "High":
+                    return products.OrderByDescending(p => p.Price).ToList();
+
+                case "Ascending":
+                    return products.OrderBy(p => p.Name).ToList();
+
+                case "Descending":
+                    return products.OrderByDescending(p => p.Name).ToList();
+            }
+
+            return products.ToList();
+        }
+
+        private async Task<List<Product>> GetRecommendedProductsAsync(string userToken)
         {
             var products = await this.GetProductsAsync(userToken);
             var customersHistory = await this.GetCustomersHistoryAsync(userToken);
@@ -87,6 +118,5 @@ namespace WXDevChallengeService.Services.OnlineStore
         {
             this._httpClient.Dispose();
         }
-
     }
 }

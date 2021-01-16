@@ -5,7 +5,6 @@ using My.Api.Models;
 using My.Api.Models.Users;
 using My.Api.Trolleys;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using WXDevChallengeService.Services.OnlineStore;
 
@@ -49,38 +48,20 @@ namespace My.Api.Controllers
         [Route("sort")]
         public async Task<IActionResult> Sort([FromQuery] string sortOption)
         {
-            if (sortOption == "Recommended")
+            try
             {
-                var recommendedProducts = await this._onlineStoreService.GetRecommendedProductsAsync(_userToken);
-                return Ok(recommendedProducts);
+                var sortedProducts = await this._onlineStoreService.GetSortedProductsAsync(_userToken, sortOption);
+                return Ok(sortedProducts);
             }
-
-            var products = await this._onlineStoreService.GetProductsAsync(_userToken);
-
-            switch (sortOption)
+            catch (OnlineStoreServiceException e)
             {
-                case "Low":
-                    return Ok(products.OrderBy(p => p.Price));
-
-                case "High":
-                    return Ok(products.OrderByDescending(p => p.Price));
-
-                case "Ascending":
-                    return Ok(products.OrderBy(p => p.Name));
-
-                case "Descending":
-                    return Ok(products.OrderByDescending(p => p.Name));
-
-                // Requirements does not mention what to do in case there is no sortOption.
-                // Therefore, I am logging and return BadRequest so that I have more
-                // test scenarios to cover.
-                default:
-                    {
-                        var message = "Invalid sorting option.";
-                        this._logger.LogError(message);
-
-                        return BadRequest(message);
-                    }
+                _logger.LogError(e.Message, e.StackTrace);
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e.StackTrace);
+                return BadRequest(e.Message);
             }
         }
 

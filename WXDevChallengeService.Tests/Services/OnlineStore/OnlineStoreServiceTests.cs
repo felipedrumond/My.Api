@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using WXDevChallengeService.Models;
 using WXDevChallengeService.Services.OnlineStore;
 
@@ -16,6 +17,14 @@ namespace WXDevChallengeService.Tests.Services.OnlineStore
     [TestClass]
     public class OnlineStoreServiceTests : TestsBase
     {
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Unresolved_HttpClient_Throws_Exception()
+        {
+            // act
+            var subjectUnderTest = new OnlineStoreService(null);
+        }
+
         [TestMethod]
         public void GetCustomersHistoryAsync_Returns_CustomerHistory()
         {
@@ -139,6 +148,63 @@ namespace WXDevChallengeService.Tests.Services.OnlineStore
                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Post),
                ItExpr.IsAny<CancellationToken>()
             );
+        }
+
+        [TestMethod]
+        [DataRow("High", "C", "B", "A")]
+        [DataRow("Low", "A", "B", "C")]
+        [DataRow("Ascending", "A", "B", "C")]
+        [DataRow("Descending", "C", "B", "A")]
+        public async Task GetSortedProductsAsync_Returns_SortedProducts(string sortOption, string expectedFirtProductName, string expectedSecondtProductName, string expectedLastProductName)
+        {
+            // arrange
+            var fakeProducts = new List<Product>() {
+                FakeProduct("A", 1, 1),
+                FakeProduct("B", 2, 2),
+                FakeProduct("C", 3, 3),
+            };
+
+            var fakeResponseContent = JsonSerializer.Serialize(fakeProducts);
+            var fakeHttpResponse = new HttpResponseMessage()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(fakeResponseContent)
+            };
+
+            var handlerMock = FakeMessageHandler(fakeHttpResponse);
+            var httpClient = new HttpClient(handlerMock.Object)
+            {
+                BaseAddress = new Uri("http://www.test.com/")
+            };
+
+            var subjectUnderTest = new OnlineStoreService(httpClient);
+
+            // act
+            var sortedProducts = await subjectUnderTest.GetSortedProductsAsync("token", sortOption);
+
+            // assert
+            Assert.AreEqual(expectedFirtProductName, sortedProducts.First().Name);
+            Assert.AreEqual(expectedSecondtProductName, sortedProducts[1].Name);
+            Assert.AreEqual(expectedLastProductName, sortedProducts.Last().Name);
+
+            handlerMock.Protected().Verify(
+               "SendAsync",
+               Times.Exactly(1),
+               ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Get),
+               ItExpr.IsAny<CancellationToken>()
+            );
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OnlineStoreServiceException))]
+        public async Task GetSortedProductsAsync_With_Invalid_SortingOption_Throws_Exception()
+        {
+            // arrange
+            var httpClient = new HttpClient();
+            var subjectUnderTest = new OnlineStoreService(httpClient);
+
+            // act
+            await subjectUnderTest.GetSortedProductsAsync("token", "invalid_sorting_option");
         }
     }
 }
