@@ -9,7 +9,7 @@ using WXDevChallengeService.Models;
 
 namespace WXDevChallengeService.Services.OnlineStore
 {
-    public class OnlineStoreService : IOnlineStoreService
+    public class OnlineStoreService : IOnlineStoreService, IDisposable
     {
         private readonly HttpClient _httpClient;
 
@@ -82,5 +82,11 @@ namespace WXDevChallengeService.Services.OnlineStore
 
             return productsOrderedByPopularity;
         }
+
+        public void Dispose()
+        {
+            this._httpClient.Dispose();
+        }
+
     }
 }
