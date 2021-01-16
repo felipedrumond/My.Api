@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -54,6 +56,31 @@ namespace WXDevChallengeService.Services.OnlineStore
             var result = await streamTask.Content.ReadAsStringAsync();
 
             return result;
+        }
+
+        public async Task<List<Product>> GetRecommendedProductsAsync(string userToken)
+        {
+            var products = await this.GetProductsAsync(userToken);
+            var customersHistory = await this.GetCustomersHistoryAsync(userToken);
+
+            // the resource api doesn't provide a product.id, therefore I'm sorting by name
+            var productsPopularity = customersHistory
+                .SelectMany(h => h.Products)
+                .GroupBy(p => p.Name)
+                .Select(g => new ProductPopularity
+                {
+                    Name = g.Key,
+                    AmountSold = g.Sum(a => a.Quantity)
+                })
+                .OrderBy(pp => pp.AmountSold)
+                .Select(pp => pp.Name)
+                .ToList();
+
+            var productsOrderedByPopularity = products
+                .OrderByDescending(p => productsPopularity.IndexOf(p.Name))
+                .ToList();
+
+            return productsOrderedByPopularity;
         }
     }
 }

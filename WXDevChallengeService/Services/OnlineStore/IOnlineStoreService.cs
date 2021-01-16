@@ -11,5 +11,7 @@ namespace WXDevChallengeService.Services.OnlineStore
         Task<List<Product>> GetProductsAsync(string userToken);
 
         Task<string> GetTrolleyTotalAsync(object trolley, string userToken);
+
+        Task<List<Product>> GetRecommendedProductsAsync(string userToken);
     }
 }
