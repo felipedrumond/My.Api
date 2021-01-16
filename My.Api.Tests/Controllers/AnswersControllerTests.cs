@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using My.Api.Controllers;
 using My.Api.Models;
 using My.Api.Models.Users;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,18 +19,46 @@ namespace My.Api.Tests.Controllers
     public class AnswersControllerTests : TestsBase
     {
         private Mock<IOnlineStoreService> onlineStoreServiceMock;
+        private Mock<ILogger<AnswersController>> loggerMock;
+        private Mock<IConfiguration> configuration;
         private AnswersController controller;
 
         [TestInitialize()]
         public void Startup()
         {
             // mock the IConfiguration for the controller
-            Mock<IConfiguration> configuration = new Mock<IConfiguration>();
+            configuration = new Mock<IConfiguration>();
             configuration.SetupGet(c => c[It.Is<string>(s => s == "CandidateToken")]).Returns("token");
             configuration.SetupGet(c => c[It.Is<string>(s => s == "CandidateName")]).Returns("candidateName");
 
             onlineStoreServiceMock = new Mock<IOnlineStoreService>(MockBehavior.Strict);
-            controller = new AnswersController(onlineStoreServiceMock.Object, configuration.Object);
+            loggerMock = new Mock<ILogger<AnswersController>>(MockBehavior.Default);
+
+            controller = new AnswersController(onlineStoreServiceMock.Object, loggerMock.Object, configuration.Object);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Unresolved_OnlineStoreService_Throws_Exception()
+        {
+            // act
+            new AnswersController(null, loggerMock.Object, configuration.Object);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Unresolved_Logger_Throws_Exception()
+        {
+            // act
+            new AnswersController(onlineStoreServiceMock.Object, null, configuration.Object);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Unresolved_Config_Throws_Exception()
+        {
+            // act
+            new AnswersController(onlineStoreServiceMock.Object, loggerMock.Object, null);
         }
 
         [TestMethod]
@@ -88,33 +118,6 @@ namespace My.Api.Tests.Controllers
             Assert.AreEqual(200, okResult.StatusCode);
             Assert.IsInstanceOfType(okResult.Value, typeof(string));
             Assert.AreEqual("14", resultValue);
-        }
-
-        [TestMethod]
-        public void Sort_Products_With_No_Order_Returns_Products_As_They_Are()
-        {
-            // arrange
-            var fakeProductA = FakeProduct("A", 10, 1);
-            var fakeProductB = FakeProduct("B", 20, 1);
-            var fakeProductC = FakeProduct("C", 30, 1);
-            var fakeProductsList = new List<WXDevChallengeService.Models.Product>() { fakeProductA, fakeProductB, fakeProductC };
-
-            onlineStoreServiceMock.Setup(r => r.GetProductsAsync(It.IsAny<string>())).Returns(Task.FromResult(fakeProductsList));
-
-            // act
-            var result = controller.Sort(null).Result;
-            var okResult = result as OkObjectResult;
-            var resultValue = (okResult.Value as IEnumerable<WXDevChallengeService.Models.Product>).ToList();
-
-            // assert
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.IsInstanceOfType(okResult.Value, typeof(IEnumerable<WXDevChallengeService.Models.Product>));
-            Assert.AreEqual(resultValue[0].Name, "A");
-            Assert.AreEqual(resultValue[1].Name, "B");
-            Assert.AreEqual(resultValue[2].Name, "C");
-
-            onlineStoreServiceMock.Verify(r => r.GetProductsAsync(It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
@@ -225,6 +228,43 @@ namespace My.Api.Tests.Controllers
             onlineStoreServiceMock.Verify(r => r.GetProductsAsync(It.IsAny<string>()), Times.Once);
         }
 
+        //[TestMethod]
+        //public void Sort_Products_Orded_By_Recommended_Returns_Products_Orded_By_Most_Sold()
+        //{
+        //    // arrange
+        //    var fakeProductA = FakeProduct("A - Least Sold Product", 10, 1);
+        //    var fakeProductB = FakeProduct("B - Second Most Sold Product", 20, 500);
+        //    var fakeProductC = FakeProduct("C - Third Most Sold Product", 30, 10);
+        //    var fakeProductD = FakeProduct("D - Most Sold Product", 20, 1000);
+
+        //    var fakeProductsList = new List<WXDevChallengeService.Models.Product>() { fakeProductA, fakeProductB, fakeProductC, fakeProductD };
+
+        //    var fakeCustomerHistory1 = FakeCustomerHistory(1, new List<WXDevChallengeService.Models.Product>() { fakeProductA, fakeProductB });
+        //    var fakeCustomerHistory2 = FakeCustomerHistory(2, new List<WXDevChallengeService.Models.Product>() { fakeProductC });
+        //    var fakeCustomerHistory3 = FakeCustomerHistory(3, new List<WXDevChallengeService.Models.Product>() { fakeProductD });
+        //    var fakeCustomerHistories = new List<CustomerHistory>() { fakeCustomerHistory1, fakeCustomerHistory2, fakeCustomerHistory3 };
+
+        //    onlineStoreServiceMock.Setup(r => r.GetCustomersHistoryAsync(It.IsAny<string>())).Returns(Task.FromResult(fakeCustomerHistories));
+        //    onlineStoreServiceMock.Setup(r => r.GetProductsAsync(It.IsAny<string>())).Returns(Task.FromResult(fakeProductsList));
+
+        //    // act
+        //    var result = controller.Sort("Recommended").Result;
+        //    var okResult = result as OkObjectResult;
+        //    var resultValue = (okResult.Value as IEnumerable<WXDevChallengeService.Models.Product>).ToList();
+
+        //    // assert
+        //    Assert.IsNotNull(okResult);
+        //    Assert.AreEqual(200, okResult.StatusCode);
+        //    Assert.IsInstanceOfType(okResult.Value, typeof(IEnumerable<WXDevChallengeService.Models.Product>));
+        //    Assert.AreEqual(resultValue[0].Name, "D - Most Sold Product");
+        //    Assert.AreEqual(resultValue[1].Name, "B - Second Most Sold Product");
+        //    Assert.AreEqual(resultValue[2].Name, "C - Third Most Sold Product");
+        //    Assert.AreEqual(resultValue[3].Name, "A - Least Sold Product");
+
+        //    onlineStoreServiceMock.Verify(r => r.GetProductsAsync(It.IsAny<string>()), Times.Once);
+        //    onlineStoreServiceMock.Verify(r => r.GetCustomersHistoryAsync(It.IsAny<string>()), Times.Once);
+        //}
+
         [TestMethod]
         public void Sort_Products_Orded_By_Recommended_Returns_Products_Orded_By_Most_Sold()
         {
@@ -234,15 +274,9 @@ namespace My.Api.Tests.Controllers
             var fakeProductC = FakeProduct("C - Third Most Sold Product", 30, 10);
             var fakeProductD = FakeProduct("D - Most Sold Product", 20, 1000);
 
-            var fakeProductsList = new List<WXDevChallengeService.Models.Product>() { fakeProductA, fakeProductB, fakeProductC, fakeProductD };
+            var fakeProductsList = new List<WXDevChallengeService.Models.Product>() { fakeProductD, fakeProductB, fakeProductC, fakeProductA };
 
-            var fakeCustomerHistory1 = FakeCustomerHistory(1, new List<WXDevChallengeService.Models.Product>() { fakeProductA, fakeProductB });
-            var fakeCustomerHistory2 = FakeCustomerHistory(2, new List<WXDevChallengeService.Models.Product>() { fakeProductC });
-            var fakeCustomerHistory3 = FakeCustomerHistory(3, new List<WXDevChallengeService.Models.Product>() { fakeProductD });
-            var fakeCustomerHistories = new List<CustomerHistory>() { fakeCustomerHistory1, fakeCustomerHistory2, fakeCustomerHistory3 };
-
-            onlineStoreServiceMock.Setup(r => r.GetCustomersHistoryAsync(It.IsAny<string>())).Returns(Task.FromResult(fakeCustomerHistories));
-            onlineStoreServiceMock.Setup(r => r.GetProductsAsync(It.IsAny<string>())).Returns(Task.FromResult(fakeProductsList));
+            onlineStoreServiceMock.Setup(r => r.GetRecommendedProductsAsync(It.IsAny<string>())).Returns(Task.FromResult(fakeProductsList));
 
             // act
             var result = controller.Sort("Recommended").Result;
@@ -258,8 +292,35 @@ namespace My.Api.Tests.Controllers
             Assert.AreEqual(resultValue[2].Name, "C - Third Most Sold Product");
             Assert.AreEqual(resultValue[3].Name, "A - Least Sold Product");
 
-            onlineStoreServiceMock.Verify(r => r.GetProductsAsync(It.IsAny<string>()), Times.Once);
-            onlineStoreServiceMock.Verify(r => r.GetCustomersHistoryAsync(It.IsAny<string>()), Times.Once);
+            onlineStoreServiceMock.Verify(r => r.GetRecommendedProductsAsync(It.IsAny<string>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void Invalid_Sort_Option_Returns_Bad_Request()
+        {
+            // arrange
+            onlineStoreServiceMock.Setup(r => r.GetProductsAsync(It.IsAny<string>())).Returns(Task.FromResult<List<WXDevChallengeService.Models.Product>>(null));
+
+            // act
+            var result = controller.Sort("?").Result;
+            var badRequest = result as BadRequestObjectResult;
+
+            // assert
+            Assert.AreEqual(400, badRequest.StatusCode);
+            Assert.AreEqual("Invalid sorting option.", badRequest.Value);
+        }
+
+        [TestMethod]
+        public void Invalid_Sort_Option_Logs_Error()
+        {
+            // arrange
+            onlineStoreServiceMock.Setup(r => r.GetProductsAsync(It.IsAny<string>())).Returns(Task.FromResult<List<WXDevChallengeService.Models.Product>>(null));
+
+            // act
+            var result = controller.Sort("?").Result;
+
+            // assert
+            loggerMock.VerifyLogging("Invalid sorting option.", LogLevel.Error);
         }
     }
 }

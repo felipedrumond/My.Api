@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using My.Api.Models;
 using My.Api.Models.Users;
 using My.Api.Trolleys;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using WXDevChallengeService.Services.OnlineStore;
@@ -15,14 +16,20 @@ namespace My.Api.Controllers
     public class AnswersController : ControllerBase
     {
         private readonly IOnlineStoreService _onlineStoreService;
+        private readonly ILogger _logger;
+        private readonly IConfiguration _config;
+
         private readonly string _userToken;
         private readonly string _candidateName;
 
-        public AnswersController(IOnlineStoreService onlineStoreService, [FromServices] IConfiguration config)
+        public AnswersController(IOnlineStoreService onlineStoreService, ILogger<AnswersController> logger, [FromServices] IConfiguration config)
         {
-            _onlineStoreService = onlineStoreService;
-            _candidateName = config["CandidateName"];
-            _userToken = config["CandidateToken"];
+            _onlineStoreService = onlineStoreService ?? throw new ArgumentNullException(nameof(onlineStoreService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+
+            _candidateName = _config["CandidateName"];
+            _userToken = _config["CandidateToken"];
         }
 
         [HttpGet]
@@ -42,6 +49,11 @@ namespace My.Api.Controllers
         [Route("sort")]
         public async Task<IActionResult> Sort([FromQuery] string sortOption)
         {
+            if (sortOption == "Recommended")
+            {
+                var recommendedProducts = await this._onlineStoreService.GetRecommendedProductsAsync(_userToken);
+                return Ok(recommendedProducts);
+            }
 
             var products = await this._onlineStoreService.GetProductsAsync(_userToken);
 
@@ -59,14 +71,16 @@ namespace My.Api.Controllers
                 case "Descending":
                     return Ok(products.OrderByDescending(p => p.Name));
 
-                case "Recommended":
+                // Requirements does not mention what to do in case there is no sortOption.
+                // Therefore, I am logging and return BadRequest so that I have more
+                // test scenarios to cover.
+                default:
                     {
-                        var recommendedProducts = await GetRecommendedProducts(products);
-                        return Ok(recommendedProducts);
-                    }
+                        var message = "Invalid sorting option.";
+                        this._logger.LogError(message);
 
-                // test does not mention what to do in case there is no sortOption: either return products with no sorting or BadRequest
-                default: return Ok(products);
+                        return BadRequest(message);
+                    }
             }
         }
 
@@ -86,30 +100,6 @@ namespace My.Api.Controllers
         {
             var trolleyTotalResult = await this._onlineStoreService.GetTrolleyTotalAsync(trolley, _userToken);
             return Ok(trolleyTotalResult);
-        }
-
-        private async Task<List<WXDevChallengeService.Models.Product>> GetRecommendedProducts(List<WXDevChallengeService.Models.Product> products)
-        {
-            var customersHistory = await this._onlineStoreService.GetCustomersHistoryAsync(_userToken);
-
-            // the resource api doesn't provide a product.id, therefore I'm sorting by name
-            var productsPopularity = customersHistory
-                .SelectMany(h => h.Products)
-                .GroupBy(p => p.Name)
-                .Select(g => new ProductPopularity
-                {
-                    Name = g.Key,
-                    AmountSold = g.Sum(a => a.Quantity)
-                })
-                .OrderBy(pp => pp.AmountSold)
-                .Select(pp => pp.Name)
-                .ToList();
-
-            var productsOrderedByPopularity = products
-                .OrderByDescending(p => productsPopularity.IndexOf(p.Name))
-                .ToList();
-
-            return productsOrderedByPopularity;
         }
     }
 }
