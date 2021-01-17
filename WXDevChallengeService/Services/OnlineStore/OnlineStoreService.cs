@@ -12,7 +12,7 @@ namespace WXDevChallengeService.Services.OnlineStore
     public class OnlineStoreService : IOnlineStoreService, IDisposable
     {
         private readonly HttpClient _httpClient;
-        private string[] sortingOptions = new string[] { "High", "Low", "Ascending", "Descending" };
+        private string[] sortingOptions = new string[] { "High", "Low", "Ascending", "Descending", "Recommended" };
 
         private readonly JsonSerializerOptions options = new JsonSerializerOptions
         {
