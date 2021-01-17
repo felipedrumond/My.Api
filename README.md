@@ -6,6 +6,7 @@
 
 ## Intro
 Thank you for giving me the opportunity to do the assessment.
+This solution it named "My.Api" to make it harder to find as it is a public repository.
 
 My main focus with this assessment is to:
 * pass the Exercises 1, 2, 3 and the **Extra for Experts** with **my own trolley calculation implementation**
