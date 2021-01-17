@@ -20,10 +20,11 @@ and also:
 * write exceptions, handle them and write unit tests that cover such scenarios
 * due to the simplicity of the project and time constraints, no third-part DI Framework will be used
 * prepare the solution to broader use of log (Serilog)
-* logs >
+* logs:
 
-[Api.Startup]:  2021-01-17 10:51:54.063 +11:00 [INF] Starting up My.Api.
-                2021-01-17 10:51:55.798 +11:00 [INF] Application started.
+([Api.Startup]:)
+2021-01-17 10:51:54.063 +11:00 [INF] Starting up My.Api.
+2021-01-17 10:51:55.798 +11:00 [INF] Application started.
 
 [Api.Request]:  2021-01-17 11:10:35.267 +11:00 [INF] **Request starting HTTP/1.1 GET http://localhost:5001/api/answers/user**
                 2021-01-17 11:10:35.325 +11:00 [INF] Executing endpoint 'My.Api.Controllers.AnswersController.GetUser (My.Api)'
@@ -36,7 +37,8 @@ and also:
                 2021-01-17 11:10:35.417 +11:00 [INF] Executed endpoint 'My.Api.Controllers.AnswersController.GetUser (My.Api)'
                 2021-01-17 11:10:35.419 +11:00 [INF] **Request finished** in 166.5124ms 200 application/json; charset=utf-8
                 
-[Errors]:       (injected a required dependency equals to null)
+[Errors]:       
+                (injected a required dependency equals to null)
                 2021-01-17 10:52:18.219 +11:00 [ERR] An unhandled exception has occurred while executing the request.
                 **System.ArgumentNullException: Value cannot be null. (Parameter 'onlineStoreService')**
                 at My.Api.Controllers.AnswersController..ctor(IOnlineStoreService onlineStoreService, ILogger`1 logger, IConfiguration config) in C:\Work\My.Api\My.Api\Controllers\AnswersController.cs:line 26 (...)
