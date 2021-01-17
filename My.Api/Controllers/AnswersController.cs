@@ -91,8 +91,16 @@ namespace My.Api.Controllers
         [Route("trolleyTotal_From_OnlineStoreService")]
         public async Task<IActionResult> GetTrolleyTotal_From_OnlineStoreService(Trolley trolley)
         {
-            var trolleyTotalResult = await this._onlineStoreService.GetTrolleyTotalAsync(trolley, _userToken);
-            return Ok(trolleyTotalResult);
+            try
+            {
+                var trolleyTotalResult = await this._onlineStoreService.GetTrolleyTotalAsync(trolley, _userToken);
+                return Ok(trolleyTotalResult);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e.StackTrace);
+                return StatusCode(500);
+            }
         }
     }
 }

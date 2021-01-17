@@ -84,7 +84,7 @@ namespace My.Api.Tests.Controllers
             // arrange
             var trolley = new Trolley()
             {
-                Products = new List<My.Api.Models.Product>() { new My.Api.Models.Product() { Name = "1", Price = 20 } },
+                Products = new List<Product>() { new Product() { Name = "1", Price = 20 } },
                 Quantities = new List<Quantity>() { new Quantity() { Name = "1", _Quantity = 1 } },
                 Specials = new List<Special>() { }
             };
@@ -113,10 +113,29 @@ namespace My.Api.Tests.Controllers
             var okResult = result as OkObjectResult;
             var resultValue = okResult.Value as string;
 
+            // assert
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
             Assert.IsInstanceOfType(okResult.Value, typeof(string));
             Assert.AreEqual("14", resultValue);
+        }
+
+        [TestMethod]
+        public async Task GetTrolleyTotal_When_It_Fails_Returns_500()
+        {
+            // arrange
+            onlineStoreServiceMock.Setup(r => r.GetTrolleyTotalAsync(It.IsAny<object>(), It.IsAny<string>()))
+                .Throws(new Exception());
+
+            var trolley = new Trolley() { };
+
+            
+            // act
+            var result = await controller.GetTrolleyTotal_From_OnlineStoreService(trolley);
+            var statusCodeResult = result as StatusCodeResult;
+
+            // assert
+            Assert.AreEqual(500, statusCodeResult.StatusCode);
         }
 
         [TestMethod]
@@ -125,7 +144,7 @@ namespace My.Api.Tests.Controllers
             // arrange
             var trolley = new Trolley()
             {
-                Products = new List<My.Api.Models.Product>() { new Product() { Name = "avocado", Price = 20 } },
+                Products = new List<Product>() { new Product() { Name = "avocado", Price = 20 } },
                 Quantities = new List<Quantity>() { new Quantity() { Name = "berries", _Quantity = 1 } },
                 Specials = new List<Special>() { }
             };
@@ -160,7 +179,7 @@ namespace My.Api.Tests.Controllers
             var trolley = new Trolley() { };
 
             // act
-            var result = controller.GetTrolleyTotal(trolley);
+            controller.GetTrolleyTotal(trolley);
 
             // assert
             loggerMock.VerifyLogging("Object reference not set to an instance of an object.", LogLevel.Error);
@@ -172,7 +191,7 @@ namespace My.Api.Tests.Controllers
             // arrange
             var trolley = new Trolley()
             {
-                Products = new List<My.Api.Models.Product>() { new Product() { Name = "avocado", Price = 20 } },
+                Products = new List<Product>() { new Product() { Name = "avocado", Price = 20 } },
                 Quantities = new List<Quantity>() { new Quantity() { Name = "berries", _Quantity = 1 } },
                 Specials = new List<Special>() { }
             };
