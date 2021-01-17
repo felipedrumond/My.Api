@@ -22,7 +22,7 @@ and also:
 * prepare the solution to broader use of log (Serilog)
 * logs:
 
-([Api.Startup]:)
+(Api.Startup)
 2021-01-17 10:51:54.063 +11:00 [INF] Starting up My.Api.
 2021-01-17 10:51:55.798 +11:00 [INF] Application started.
 
