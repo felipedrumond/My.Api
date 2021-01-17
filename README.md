@@ -77,9 +77,20 @@ use:
 
 ```cs
 // arrange
-var fakeProductA = FakeProduct("A", 1, 1);
-var fakeProductB = FakeProduct("B", 2, 2);
-var fakeProductC = FakeProduct("C", 2, 2);
+var fakeProductsList = new List<Product>() {
+    FakeProduct("A", 1, 1),
+    FakeProduct("B", 2, 2),
+    FakeProduct("C", 2, 2)
+};
+
+myServiceMock.Setup(r => r.GetProducts()).Returns(Task.FromResult(fakeProductsList));
+
+// act
+(...)
+
+// assert
+myServiceMock.Verify(r => r.GetProducts(), Times.Once);
+
 ```
 
 ### Solution Structure
