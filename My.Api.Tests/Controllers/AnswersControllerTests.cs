@@ -6,6 +6,7 @@ using Moq;
 using My.Api.Controllers;
 using My.Api.Models;
 using My.Api.Models.Users;
+using My.Api.Trolleys;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,6 +121,26 @@ namespace My.Api.Tests.Controllers
         }
 
         [TestMethod]
+        public void GetTrolleyTotal_With_Invalid_Data_Returns_BadRequest()
+        {
+            // arrange
+            var trolley = new Trolley()
+            {
+                Products = new List<My.Api.Models.Product>() { new My.Api.Models.Product() { Name = "avocado", Price = 20 } },
+                Quantities = new List<Quantity>() { new Quantity() { Name = "berries", _Quantity = 1 } },
+                Specials = new List<Special>() { }
+            };
+
+            // act
+            var result = controller.GetTrolleyTotal(trolley);
+            var badRequest = result as BadRequestObjectResult;
+
+            // assert
+            Assert.AreEqual(400, badRequest.StatusCode);
+            Assert.AreEqual("Trolley failed to calculate its total.", badRequest.Value);
+        }
+
+        [TestMethod]
         public void Sort_Products_Returns_Sorted_Products()
         {
             // arrange
@@ -140,7 +161,7 @@ namespace My.Api.Tests.Controllers
         }
 
         [TestMethod]
-        public void Invalid_Sort_Option_Returns_Bad_Request()
+        public void Invalid_Sort_Option_Returns_BadRequest()
         {
             // arrange
             onlineStoreServiceMock.Setup(r => r.GetSortedProductsAsync(It.IsAny<string>(), "invalid_sort_option"))

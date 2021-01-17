@@ -69,10 +69,22 @@ namespace My.Api.Controllers
         [Route("trolleyTotal")]
         public IActionResult GetTrolleyTotal(Trolley trolley)
         {
-            var trolleyCalculator = new TrolleyCalculator(trolley);
-            var total = trolleyCalculator.CalculateTotal();
-
-            return Ok(total);
+            try
+            {
+                var trolleyCalculator = new TrolleyCalculator(trolley);
+                var total = trolleyCalculator.CalculateTotal();
+                return Ok(total);
+            }
+            catch (TrolleyCalculationException e)
+            {
+                _logger.LogError(e.Message, e.StackTrace);
+                return BadRequest(e.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message, e.StackTrace);
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPost]
