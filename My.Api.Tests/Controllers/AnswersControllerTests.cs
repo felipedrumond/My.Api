@@ -6,7 +6,6 @@ using Moq;
 using My.Api.Controllers;
 using My.Api.Models;
 using My.Api.Models.Users;
-using My.Api.Trolleys;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,7 +125,7 @@ namespace My.Api.Tests.Controllers
             // arrange
             var trolley = new Trolley()
             {
-                Products = new List<My.Api.Models.Product>() { new My.Api.Models.Product() { Name = "avocado", Price = 20 } },
+                Products = new List<My.Api.Models.Product>() { new Product() { Name = "avocado", Price = 20 } },
                 Quantities = new List<Quantity>() { new Quantity() { Name = "berries", _Quantity = 1 } },
                 Specials = new List<Special>() { }
             };
@@ -138,6 +137,24 @@ namespace My.Api.Tests.Controllers
             // assert
             Assert.AreEqual(400, badRequest.StatusCode);
             Assert.AreEqual("Trolley failed to calculate its total.", badRequest.Value);
+        }
+
+        [TestMethod]
+        public void GetTrolleyTotal_With_Invalid_Data_Logs_Error()
+        {
+            // arrange
+            var trolley = new Trolley()
+            {
+                Products = new List<My.Api.Models.Product>() { new Product() { Name = "avocado", Price = 20 } },
+                Quantities = new List<Quantity>() { new Quantity() { Name = "berries", _Quantity = 1 } },
+                Specials = new List<Special>() { }
+            };
+
+            // act
+            var result = controller.GetTrolleyTotal(trolley);
+
+            // assert
+            loggerMock.VerifyLogging("Trolley failed to calculate its total.", LogLevel.Error);
         }
 
         [TestMethod]
