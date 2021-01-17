@@ -53,7 +53,7 @@ and also:
                 (invalid request)
                 2021-01-17 11:06:14.357 +11:00 [INF] Request starting HTTP/1.1 POST http://localhost:5001/api/answers/trolleyTotal application/json 917
                 (...)
-                2021-01-17 11:06:14.500 +11:00 [ERR] **rolley failed to calculate its total.**
+                2021-01-17 11:06:14.500 +11:00 [ERR] **trolley failed to calculate its total.**
                 2021-01-17 11:06:14.500 +11:00 [INF] Executed action method My.Api.Controllers.AnswersController.GetTrolleyTotal (My.Api), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 98.8312ms.
                 2021-01-17 11:06:14.500 +11:00 [INF] Executing ObjectResult, writing value of type 'System.String'.
 ```
