@@ -8,17 +8,54 @@
 Thank you for giving me the opportunity to do the assessment.
 
 My main focus with this assessment is to:
-* pass the Exercises 1, 2, 3 and the **Extra for Experts** with my own trolley calculation implementation
+* pass the Exercises 1, 2, 3 and the **Extra for Experts** with **my own trolley calculation implementation**
 * ensure code is clean and readable, with well named namespaces, classes, methods and variables
 * ensure separation of concerns where possible (given time constraints)
 * use best practices where possible (given time constraints)
 
 and also:
-* use dependency injection of any dependencies / mock their behaviour in unit tests
-* demonstrate unit test coverage (>85% due to time constraints) of the WXDevChallengeService and My.Api
-* ease the creation of new unit tests by providing methods to create FakeObjects, enabling developers to test more while writing less code
-* prepare the solution to broader use of log (Serilog)
+
+* use **dependency injection** of any dependencies / **mock their behaviour in unit tests**
+* unit tests covering >85% of the code (due to time constraints)
 * write exceptions, handle them and write unit tests that cover such scenarios
+* due to the simplicity of the project and time constraints, no third-part DI Framework will be used
+* prepare the solution to broader use of log (Serilog)
+* logs:
+
+[Api.Startup]:  2021-01-17 10:51:54.063 +11:00 [INF] Starting up My.Api.
+                2021-01-17 10:51:55.798 +11:00 [INF] Application started.
+
+[Api.Request]:  2021-01-17 11:10:35.267 +11:00 [INF] **Request starting HTTP/1.1 GET http://localhost:5001/api/answers/user**
+                2021-01-17 11:10:35.325 +11:00 [INF] Executing endpoint 'My.Api.Controllers.AnswersController.GetUser (My.Api)'
+                2021-01-17 11:10:35.355 +11:00 [INF] Route matched with {action = "GetUser", controller = "Answers"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult GetUser() on controller My.Api.Controllers.AnswersController (My.Api).
+                2021-01-17 11:10:35.385 +11:00 [INF] **Executing action** method My.Api.Controllers.AnswersController.GetUser (My.Api) - Validation state: "Valid"
+
+[Api.Response]: 2021-01-17 11:10:35.391 +11:00 [INF] **Executed action** method My.Api.Controllers.AnswersController.GetUser (My.Api), returned result Microsoft.AspNetCore.Mvc.OkObjectResult in 0.414ms.
+                2021-01-17 11:10:35.395 +11:00 [INF] **Executing ObjectResult**, writing value of type 'My.Api.Models.Users.User'.
+                2021-01-17 11:10:35.416 +11:00 [INF] Executed action My.Api.Controllers.AnswersController.GetUser (My.Api) in 56.0568ms
+                2021-01-17 11:10:35.417 +11:00 [INF] Executed endpoint 'My.Api.Controllers.AnswersController.GetUser (My.Api)'
+                2021-01-17 11:10:35.419 +11:00 [INF] **Request finished** in 166.5124ms 200 application/json; charset=utf-8
+                
+[Errors]:       (injected a required dependency equals to null)
+                2021-01-17 10:52:18.219 +11:00 [ERR] An unhandled exception has occurred while executing the request.
+                **System.ArgumentNullException: Value cannot be null. (Parameter 'onlineStoreService')**
+                at My.Api.Controllers.AnswersController..ctor(IOnlineStoreService onlineStoreService, ILogger`1 logger, IConfiguration config) in C:\Work\My.Api\My.Api\Controllers\AnswersController.cs:line 26 (...)
+
+                (invalid request)
+                2021-01-17 10:59:07.070 +11:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/api/answers/sort?sortOption=invalid_sort_option
+                (...)
+                2021-01-17 10:59:07.273 +11:00 [ERR] **Invalid sorting option.**
+                2021-01-17 10:59:07.273 +11:00 [INF] Executed action method My.Api.Controllers.AnswersController.Sort (My.Api), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 140.3506ms.
+                2021-01-17 10:59:07.274 +11:00 [INF] Executing ObjectResult, writing value of type 'System.String'.
+
+                (invalid request)
+                2021-01-17 11:06:14.357 +11:00 [INF] Request starting HTTP/1.1 POST http://localhost:5001/api/answers/trolleyTotal application/json 917
+                (...)
+                2021-01-17 11:06:14.500 +11:00 [ERR] **rolley failed to calculate its total.**
+                2021-01-17 11:06:14.500 +11:00 [INF] Executed action method My.Api.Controllers.AnswersController.GetTrolleyTotal (My.Api), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 98.8312ms.
+                2021-01-17 11:06:14.500 +11:00 [INF] Executing ObjectResult, writing value of type 'System.String'.
+
+* ease the creation of new unit tests by providing methods to create FakeObjects, enabling developers to test more while writing less code
 
 ```cs
 protected Product FakeProduct(string name, decimal price, decimal quantity)
@@ -44,12 +81,10 @@ var fakeProductC = FakeProduct("C", 2, 2);
 
 ### Solution Structure
 The solution has the following projects:
-* WXDevChallengeService.Api (Models and Services for fetching data from Woolies' api, aka "WX Dev Challenge Service")
-* WXDevChallengeService.Api.Tests (Unit Tests for Resources.Api)
 * My.Api (Models, Controllers for providing the answers of the challenges) 
 * My.Api.Tests (Unit Tests for My.Api)
-
-![Solution Structure](/documentation/images/solution-structure.png "Solution Structure")
+* WXDevChallengeService.Api (Models and Services for fetching data from Woolies' api, aka "WX Dev Challenge Service")
+* WXDevChallengeService.Api.Tests (Unit Tests for Resources.Api)
 
 ## How to run the solution
 The project was written in .NET Core 3.1 and Visual Studio 2019.
