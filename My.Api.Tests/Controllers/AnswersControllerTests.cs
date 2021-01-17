@@ -140,6 +140,33 @@ namespace My.Api.Tests.Controllers
         }
 
         [TestMethod]
+        public void Unkown_Exception_When_Getthing_TrolleyTotal_Returns_BadRequest()
+        {
+            // arrange
+            var trolley = new Trolley() { };
+
+            // act
+            var result = controller.GetTrolleyTotal(trolley);
+            var badRequest = result as BadRequestObjectResult;
+
+            // assert
+            Assert.AreEqual(400, badRequest.StatusCode);
+        }
+
+        [TestMethod]
+        public void Unkown_Exception_When_Getthing_TrolleyTotal_Logs_Error()
+        {
+            // arrange
+            var trolley = new Trolley() { };
+
+            // act
+            var result = controller.GetTrolleyTotal(trolley);
+
+            // assert
+            loggerMock.VerifyLogging("Object reference not set to an instance of an object.", LogLevel.Error);
+        }
+
+        [TestMethod]
         public void GetTrolleyTotal_With_Invalid_Data_Logs_Error()
         {
             // arrange
@@ -194,6 +221,22 @@ namespace My.Api.Tests.Controllers
         }
 
         [TestMethod]
+        public void Unkown_Exception_When_Sorting_Returns_BadRequest()
+        {
+            // arrange
+            onlineStoreServiceMock.Setup(r => r.GetSortedProductsAsync(It.IsAny<string>(), "high"))
+                .Throws(new Exception("unkown exception."));
+
+            // act
+            var result = controller.Sort("high").Result;
+            var badRequest = result as BadRequestObjectResult;
+
+            // assert
+            Assert.AreEqual(400, badRequest.StatusCode);
+            Assert.AreEqual("unkown exception.", badRequest.Value);
+        }
+
+        [TestMethod]
         public void Invalid_Sort_Option_Logs_Error()
         {
             // arrange
@@ -205,6 +248,20 @@ namespace My.Api.Tests.Controllers
 
             // assert
             loggerMock.VerifyLogging("Invalid sorting option.", LogLevel.Error);
+        }
+
+        [TestMethod]
+        public void Unkown_Exception_When_Sorting_Logs_Error()
+        {
+            // arrange
+            onlineStoreServiceMock.Setup(r => r.GetSortedProductsAsync(It.IsAny<string>(), "high"))
+                .Throws(new Exception("unkown exception."));
+
+            // act
+            var result = controller.Sort("high").Result;
+
+            // assert
+            loggerMock.VerifyLogging("unkown exception.", LogLevel.Error);
         }
     }
 }
