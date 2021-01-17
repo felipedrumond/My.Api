@@ -22,9 +22,9 @@ and also:
 * prepare the solution to broader use of log (Serilog)
 * logs:
 
-(Api.Startup)
-2021-01-17 10:51:54.063 +11:00 [INF] Starting up My.Api.
-2021-01-17 10:51:55.798 +11:00 [INF] Application started.
+```cs
+[Api.Startup]:  2021-01-17 10:51:54.063 +11:00 [INF] Starting up My.Api.
+                2021-01-17 10:51:55.798 +11:00 [INF] Application started.
 
 [Api.Request]:  2021-01-17 11:10:35.267 +11:00 [INF] **Request starting HTTP/1.1 GET http://localhost:5001/api/answers/user**
                 2021-01-17 11:10:35.325 +11:00 [INF] Executing endpoint 'My.Api.Controllers.AnswersController.GetUser (My.Api)'
@@ -56,6 +56,7 @@ and also:
                 2021-01-17 11:06:14.500 +11:00 [ERR] **rolley failed to calculate its total.**
                 2021-01-17 11:06:14.500 +11:00 [INF] Executed action method My.Api.Controllers.AnswersController.GetTrolleyTotal (My.Api), returned result Microsoft.AspNetCore.Mvc.BadRequestObjectResult in 98.8312ms.
                 2021-01-17 11:06:14.500 +11:00 [INF] Executing ObjectResult, writing value of type 'System.String'.
+```
 
 * ease the creation of new unit tests by providing methods to create FakeObjects, enabling developers to test more while writing less code
 
