@@ -37,8 +37,7 @@ and also:
                 2021-01-17 11:10:35.417 +11:00 [INF] Executed endpoint 'My.Api.Controllers.AnswersController.GetUser (My.Api)'
                 2021-01-17 11:10:35.419 +11:00 [INF] **Request finished** in 166.5124ms 200 application/json; charset=utf-8
                 
-[Errors]:       
-                (injected a required dependency equals to null)
+[Errors]:       (injected a required dependency equals to null)
                 2021-01-17 10:52:18.219 +11:00 [ERR] An unhandled exception has occurred while executing the request.
                 **System.ArgumentNullException: Value cannot be null. (Parameter 'onlineStoreService')**
                 at My.Api.Controllers.AnswersController..ctor(IOnlineStoreService onlineStoreService, ILogger`1 logger, IConfiguration config) in C:\Work\My.Api\My.Api\Controllers\AnswersController.cs:line 26 (...)
